@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIP Prediction Manual Payment</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f9;
+text-align:center;
+padding-top:30px;
+}
+
+.container{
+background:white;
+padding:20px;
+width:90%;
+max-width:420px;
+margin:auto;
+border-radius:12px;
+box-shadow:0px 6px 20px rgba(0,0,0,0.15);
+}
+
+input, textarea{
+width:90%;
+padding:10px;
+margin:8px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+padding:10px 15px;
+background:#0d6efd;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+margin:5px;
+}
+
+.hidden{display:none;}
+
+.pred{
+background:#e9f2ff;
+padding:10px;
+margin:8px;
+border-radius:8px;
+}
+
+.small{
+font-size:13px;
+color:gray;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>VIP Prediction System</h2>
+
+<!-- REGISTER -->
+<div id="register">
+
+<input id="regUser" placeholder="Username">
+<input id="regPass" type="password" placeholder="Password">
+
+<button onclick="register()">Register</button>
+<button onclick="showLogin()">Login</button>
+
+</div>
+
+<!-- LOGIN -->
+<div id="login" class="hidden">
+
+<input id="loginUser" placeholder="Username">
+<input id="loginPass" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+</div>
+
+<!-- PAYMENT -->
+<div id="payment" class="hidden">
+
+<h3>🔒 Malipo Yanahitajika</h3>
+
+<p><b>Lipa Tsh 1000</b></p>
+
+<p class="small">
+Tuma M-Pesa kwenda: <b>0743 507 691</b><br>
+Jina: BONIPHACE
+</p>
+
+<input id="trx" placeholder="Weka Transaction ID (Receipt)">
+
+<button onclick="submitPayment()">Tuma Ushahidi</button>
+
+</div>
+
+<!-- WAITING -->
+<div id="waiting" class="hidden">
+
+<h3>⏳ Subiri Approval</h3>
+
+<p>Tunathibitisha malipo yako...</p>
+
+</div>
+
+<!-- USER -->
+<div id="user" class="hidden">
+
+<h2>VIP Predictions</h2>
+
+<div id="preds"></div>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="hidden">
+
+<h3>Admin Panel</h3>
+
+<p><b>Pending Payments</b></p>
+
+<div id="payments"></div>
+
+<hr>
+
+<input id="adminText" placeholder="Add prediction">
+<button onclick="addPred()">Add Prediction</button>
+
+</div>
+
+</div>
+
+<script>
+
+// ======================
+// STORAGE KEYS
+// ======================
+
+window.onload=function(){
+
+checkUser();
+
+loadPayments();
+
+}
+
+
+
+// REGISTER
+function register(){
+
+let u=document.getElementById("regUser").value;
+let p=document.getElementById("regPass").value;
+
+localStorage.setItem("vipUser",u);
+localStorage.setItem("vipPass",p);
+
+alert("Account created");
+showLogin();
+
+}
+
+
+
+// LOGIN
+function login(){
+
+let u=document.getElementById("loginUser").value;
+let p=document.getElementById("loginPass").value;
+
+if(u==localStorage.getItem("vipUser") && p==localStorage.getItem("vipPass")){
+
+checkUser();
+
+}else{
+alert("Wrong login");
+}
+
+}
+
+
+
+// CHECK USER STATUS
+function checkUser(){
+
+let paid=localStorage.getItem("vipPaid");
+
+document.getElementById("register").style.display="none";
+document.getElementById("login").style.display="none";
+
+if(paid=="true"){
+document.getElementById("user").style.display="block";
+loadPreds();
+}else{
+document.getElementById("payment").style.display="block";
+}
+
+}
+
+
+
+// SHOW LOGIN
+function showLogin(){
+
+document.getElementById("register").style.display="none";
+document.getElementById("login").style.display="block";
+
+}
+
+
+
+// SUBMIT PAYMENT (MANUAL)
+function submitPayment(){
+
+let trx=document.getElementById("trx").value;
+
+if(trx==""){
+alert("Weka Transaction ID");
+return;
+}
+
+// save pending payment
+let payments=JSON.parse(localStorage.getItem("payments")||"[]");
+
+payments.push({
+user:localStorage.getItem("vipUser"),
+trx:trx,
+status:"pending"
+});
+
+localStorage.setItem("payments",JSON.stringify(payments));
+
+document.getElementById("payment").style.display="none";
+document.getElementById("waiting").style.display="block";
+
+alert("Ushahidi umetumwa, subiri approval");
+}
+
+
+
+// LOAD PAYMENTS (ADMIN)
+function loadPayments(){
+
+let box=document.getElementById("payments");
+if(!box) return;
+
+box.innerHTML="";
+
+let payments=JSON.parse(localStorage.getItem("payments")||"[]");
+
+payments.forEach((p,i)=>{
+
+let div=document.createElement("div");
+div.className="pred";
+
+div.innerHTML=`
+User: ${p.user}<br>
+TRX: ${p.trx}<br>
+Status: ${p.status}<br><br>
+<button onclick="approve(${i})">Approve</button>
+`;
+
+box.appendChild(div);
+
+});
+
+}
+
+
+
+// APPROVE PAYMENT
+function approve(i){
+
+let payments=JSON.parse(localStorage.getItem("payments"));
+
+payments[i].status="approved";
+
+localStorage.setItem("payments",JSON.stringify(payments));
+
+localStorage.setItem("vipPaid","true");
+
+alert("Payment Approved");
+
+location.reload();
+
+}
+
+
+
+// ADD PREDICTION
+function addPred(){
+
+let text=document.getElementById("adminText").value;
+
+let preds=JSON.parse(localStorage.getItem("preds")||"[]");
+
+preds.push(text);
+
+localStorage.setItem("preds",JSON.stringify(preds));
+
+alert("Prediction added");
+
+}
+
+
+
+// LOAD PREDICTIONS
+function loadPreds(){
+
+let box=document.getElementById("preds");
+
+if(!box) return;
+
+box.innerHTML="";
+
+let preds=JSON.parse(localStorage.getItem("preds")||"[]");
+
+preds.forEach(p=>{
+
+let d=document.createElement("div");
+d.className="pred";
+d.innerText=p;
+box.appendChild(d);
+
+});
+
+}
+
+
+
+// LOGOUT
+function logout(){
+location.reload();
+}
+
+</script>
+
+</body>
+</html>
