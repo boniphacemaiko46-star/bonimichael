@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIP Predictions App</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0f172a;
+margin:0;
+color:white;
+}
+
+.header{
+background:#1e293b;
+padding:15px;
+text-align:center;
+font-size:20px;
+font-weight:bold;
+}
+
+.container{
+padding:15px;
+max-width:500px;
+margin:auto;
+}
+
+.card{
+background:#1e293b;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 3px 10px rgba(0,0,0,0.3);
+}
+
+input, select{
+width:95%;
+padding:10px;
+margin:5px 0;
+border-radius:6px;
+border:none;
+}
+
+button{
+padding:10px;
+background:#38bdf8;
+border:none;
+color:black;
+border-radius:6px;
+cursor:pointer;
+margin-top:5px;
+width:100%;
+font-weight:bold;
+}
+
+.free{
+border-left:5px solid #22c55e;
+}
+
+.vip{
+border-left:5px solid #f59e0b;
+}
+
+.small{
+font-size:12px;
+color:#94a3b8;
+}
+
+.hidden{display:none;}
+
+.nav{
+display:flex;
+justify-content:space-around;
+background:#111827;
+padding:10px;
+position:sticky;
+bottom:0;
+}
+
+.nav button{
+width:30%;
+background:#334155;
+color:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">🔥 VIP PREDICTION APP</div>
+
+<div class="container">
+
+<!-- ADMIN PANEL -->
+<div class="card">
+<h3>Admin Panel</h3>
+
+<input id="teamA" placeholder="Team A">
+<input id="teamB" placeholder="Team B">
+
+<input type="date" id="matchDate">
+
+<input id="odds" placeholder="Odds mfano 2.10">
+
+<select id="type">
+<option value="FREE">Free Prediction</option>
+<option value="VIP">VIP Prediction</option>
+</select>
+
+<input id="prediction" placeholder="Prediction mfano Over 2.5">
+
+<button onclick="addMatch()">➕ Add Match</button>
+
+</div>
+
+<!-- FREE PREDICTIONS -->
+<div class="card free">
+<h3>🟢 Free Predictions</h3>
+<div id="freeList"></div>
+</div>
+
+<!-- VIP PREDICTIONS -->
+<div class="card vip">
+<h3>⭐ VIP Predictions</h3>
+<div id="vipList"></div>
+</div>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+<button onclick="showAll()">All</button>
+<button onclick="showFree()">Free</button>
+<button onclick="showVIP()">VIP</button>
+</div>
+
+<script>
+
+// STORAGE
+let matches = JSON.parse(localStorage.getItem("matches") || "[]");
+
+// LOAD
+window.onload=function(){
+render();
+}
+
+// ADD MATCH
+function addMatch(){
+
+let a=document.getElementById("teamA").value;
+let b=document.getElementById("teamB").value;
+let date=document.getElementById("matchDate").value;
+let odds=document.getElementById("odds").value;
+let pred=document.getElementById("prediction").value;
+let type=document.getElementById("type").value;
+
+if(a==""||b==""||date==""||odds==""||pred==""){
+alert("Jaza fields zote");
+return;
+}
+
+let match={
+teamA:a,
+teamB:b,
+date:date,
+odds:odds,
+prediction:pred,
+type:type
+};
+
+matches.push(match);
+
+localStorage.setItem("matches",JSON.stringify(matches));
+
+alert("🔥 Match imeongezwa!");
+
+notifyUser(a+" vs "+b+" added!");
+
+render();
+
+}
+
+// NOTIFICATION
+function notifyUser(msg){
+alert("📢 New Prediction: "+msg);
+}
+
+// RENDER
+function render(){
+
+let free=document.getElementById("freeList");
+let vip=document.getElementById("vipList");
+
+free.innerHTML="";
+vip.innerHTML="";
+
+matches.forEach(m=>{
+
+let box=`<div class="card">
+<b>${m.teamA} vs ${m.teamB}</b><br>
+📅 ${m.date}<br>
+📊 Odds: ${m.odds}<br>
+🎯 ${m.prediction}
+</div>`;
+
+if(m.type=="FREE"){
+free.innerHTML+=box;
+}else{
+vip.innerHTML+=box;
+}
+
+});
+
+}
+
+// FILTERS
+function showAll(){
+render();
+}
+
+function showFree(){
+let free=document.getElementById("freeList");
+let vip=document.getElementById("vipList");
+free.style.display="block";
+vip.style.display="none";
+}
+
+function showVIP(){
+let free=document.getElementById("freeList");
+let vip=document.getElementById("vipList");
+free.style.display="none";
+vip.style.display="block";
+}
+
+</script>
+
+</body>
+</html>
